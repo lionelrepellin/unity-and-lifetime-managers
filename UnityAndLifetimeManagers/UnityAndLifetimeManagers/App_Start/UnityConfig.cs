@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Configuration;
+using UnityAndLifetimeManagers.Service;
 
 namespace UnityAndLifetimeManagers.App_Start
 {
@@ -37,6 +38,8 @@ namespace UnityAndLifetimeManagers.App_Start
 
             // TODO: Register your types here
             // container.RegisterType<IProductRepository, ProductRepository>();
+
+            container.RegisterType<MainService>();
         }
     }
 }

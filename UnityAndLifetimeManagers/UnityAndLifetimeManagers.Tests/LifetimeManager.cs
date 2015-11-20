@@ -21,7 +21,7 @@ namespace UnityAndLifetimeManagers.Tests
         /// <summary>
         /// This first demo shows what happens when you resolve a concrete class without first registering that class with the container. 
         /// It will be instantiated for each resolve (as though registered with a TransientLifetimeManager), 
-        /// all dependencies in its constructor will be resolved by the container, and it will not be disposed.
+        /// all dependencies in its constructor will be resolved by the container, and it WILL NOT BE DISPOSED.
         /// </summary>
         [TestMethod]
         public void ResolveType()
@@ -30,6 +30,8 @@ namespace UnityAndLifetimeManagers.Tests
 
             using (var container = new UnityContainer())
             {
+                // class is not registered with the container
+                
                 var serviceA = container.Resolve<MainService>();
                 var serviceB = container.Resolve<MainService>();
 
