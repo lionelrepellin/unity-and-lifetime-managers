@@ -35,7 +35,7 @@ namespace UnityAndLifetimeManagers.Tests
 
             Assert.AreEqual(0, MainService.DisposeCounter);
         }
-        
+
         /// <summary>
         /// When an interface is registered with a container it defaults to using a TransientLifetimeManager.
         /// </summary>
@@ -132,8 +132,8 @@ namespace UnityAndLifetimeManagers.Tests
         }
 
         /// <summary>
-        /// The Externally Controlled LifetimeManager tells the container to let an external source manage the object, but 
-        /// it will instantiate the object for the first resolve if necessary. 
+        /// The Externally Controlled LifetimeManager tells the container to let an external source manage 
+        /// the object, but it will instantiate the object for the first resolve if necessary. 
         /// This effectively means that you are creating a SINGLETON that the container WILL NOT DISPOSE.
         /// </summary>
         [TestMethod]
@@ -154,6 +154,89 @@ namespace UnityAndLifetimeManagers.Tests
             }
 
             Assert.AreEqual(0, MainService.DisposeCounter);
+        }
+
+        /// <summary>
+        /// You may register the same interface multiple times with the container so long as you provide a key 
+        /// to discriminate between them. When you do this each registration has its own unique lifetime manager.
+        /// </summary>
+        [TestMethod]
+        public void ContainerControlledLifetimeManagerWithKey()
+        {
+            MainService.ResetCounters();
+
+            using (var container = new UnityContainer())
+            {
+                var manager1 = new ContainerControlledLifetimeManager();
+                container.RegisterType<IMainService, MainService>("1", manager1);
+
+                var manager2 = new ContainerControlledLifetimeManager();
+                container.RegisterType<IMainService, MainService>("2", manager2);
+
+                try
+                {
+                    container.Resolve<IMainService>();
+                    Assert.Fail("An exception should have been thrown");
+                }
+                catch (ResolutionFailedException ex)
+                {
+                    Assert.IsNotNull(ex);
+                }
+                catch (Exception ex)
+                {
+                    Assert.Fail(string.Format("Unexpected exception of type {0} caught: {1}", ex.GetType(), ex.Message));
+                }
+                
+                var service1A = container.Resolve<IMainService>("1");
+                var service1B = container.Resolve<IMainService>("1");
+                var service2A = container.Resolve<IMainService>("2");
+                var service2B = container.Resolve<IMainService>("2");
+
+                Assert.AreSame(service1A, service1B);
+                Assert.AreSame(service2A, service2B);
+                Assert.AreNotSame(service1A, service2A);
+                Assert.AreEqual(2, MainService.ConstructorCounter);
+            }
+
+            Assert.AreEqual(2, MainService.DisposeCounter);
+        }
+
+        /// <summary>
+        /// This just serves as a reminder that container registration only respects the mapping you specify. 
+        /// Here we have registered MainService as IMainService, and thus we can not resolve IAnotherMainService even tough 
+        /// the MainService class implements that interface too.
+        /// </summary>
+        [TestMethod]
+        public void RegisterTypeForMultipleInterfaces()
+        {
+            MainService.ResetCounters();
+
+            using (var container = new UnityContainer())
+            {
+                var manager = new ContainerControlledLifetimeManager();
+                container.RegisterType<IMainService, MainService>(manager);
+
+                var service = container.Resolve<IMainService>();
+
+                try
+                {
+                    container.Resolve<IAnotherMainService>();
+                    Assert.Fail("An exception should have been thrown");
+                }
+                catch (ResolutionFailedException ex)
+                {
+                    Assert.IsNotNull(ex);
+                }
+                catch (Exception ex)
+                {
+                    Assert.Fail(string.Format("Unexpected exception of type {0} caught: {1}", ex.GetType(), ex.Message));
+                }
+                
+                Assert.IsNotNull(service);
+                Assert.AreEqual(1, MainService.ConstructorCounter);
+            }
+
+            Assert.AreEqual(1, MainService.DisposeCounter);
         }
     }
 }
