@@ -9,6 +9,10 @@ using UnityAndLifetimeManagers.Controllers;
 using UnityAndLifetimeManagers.Service;
 using Microsoft.Practices.Unity;
 
+// ================================================================================== //
+// Source: http://www.tomdupont.net/2013/12/undestanding-unity-lifetime-managers.html //
+// ================================================================================== //
+
 namespace UnityAndLifetimeManagers.Tests
 {
     [TestClass]
@@ -60,8 +64,8 @@ namespace UnityAndLifetimeManagers.Tests
 
         /// <summary>
         /// This test will yield the same results as above. The MainService class will be instantiated for each resolve, 
-        /// all dependencies in its constructor will be resolved by the container, and 
-        /// IT WILL NOT BE DISPOSED of by the container.
+        /// all dependencies in its constructor will be resolved by the container, 
+        /// and IT WILL NOT BE DISPOSED of by the container.
         /// </summary>
         [TestMethod]
         public void TransientLifetimeManager()
