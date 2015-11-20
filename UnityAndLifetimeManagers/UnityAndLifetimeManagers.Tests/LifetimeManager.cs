@@ -238,5 +238,123 @@ namespace UnityAndLifetimeManagers.Tests
 
             Assert.AreEqual(1, MainService.DisposeCounter);
         }
+        
+        /// <summary>
+        /// This is a very odd behavior, and personally I consider it to be a bug! 
+        /// When you map the same class to multiple interfaces, unity only respects the last LifetimeManager registered for that class.
+        /// </summary>
+        [TestMethod]
+        public void ContainerControlledLifetimeManagerWithMultipleInterfaces()
+        {
+            MainService.ResetCounters();
+
+            using (var container = new UnityContainer())
+            {
+                var manager = new TransientLifetimeManager();
+                container.RegisterType<IMainService, MainService>(manager);
+
+                var anotherManager = new ContainerControlledLifetimeManager();
+                container.RegisterType<IAnotherMainService, MainService>(anotherManager);
+
+                var serviceA = container.Resolve<IMainService>();
+                var serviceB = container.Resolve<IMainService>();
+                var anotherServiceA = container.Resolve<IAnotherMainService>();
+                var anotherServiceB = container.Resolve<IAnotherMainService>();
+
+                Assert.AreSame(serviceA, serviceB);
+                Assert.AreSame(anotherServiceA, anotherServiceB);
+                Assert.AreSame(serviceA, anotherServiceA);
+                Assert.AreEqual(1, MainService.ConstructorCounter);
+            }
+
+            Assert.AreEqual(1, MainService.DisposeCounter);
+        }
+
+        /// <summary>
+        /// This is the same bug demonstrated in the previous test, only the container registration is reversed. 
+        /// Don't worry, further down I demonstrate better ways to register the same object with multiple interfaces.
+        /// </summary>
+        [TestMethod]
+        public void TransientLifetimeManagerWithMultipleInterfaces()
+        {
+            MainService.ResetCounters();
+
+            using (var container = new UnityContainer())
+            {
+                var manager = new ContainerControlledLifetimeManager();
+                container.RegisterType<IMainService, MainService>(manager);
+
+                var anotherManager = new TransientLifetimeManager();
+                container.RegisterType<IAnotherMainService, MainService>(anotherManager);
+
+                var demoA = container.Resolve<IMainService>();
+                var demoB = container.Resolve<IMainService>();
+                var anotherDemoA = container.Resolve<IAnotherMainService>();
+                var anotherDemoB = container.Resolve<IAnotherMainService>();
+
+                Assert.AreNotSame(demoA, demoB);
+                Assert.AreNotSame(anotherDemoA, anotherDemoB);
+                Assert.AreNotSame(demoA, anotherDemoA);
+                Assert.AreEqual(4, MainService.ConstructorCounter);
+            }
+
+            Assert.AreEqual(0, MainService.DisposeCounter);
+        }
+
+        /// <summary>
+        /// You can use register instance multiple times to resolve the same instance of an object for different interfaces. 
+        /// However, this will cause your object to be disposed of multiple times.
+        /// </summary>
+        [TestMethod]
+        public void RegisterInstanceMultipleTimes()
+        {
+            MainService.ResetCounters();
+
+            using (var container = new UnityContainer())
+            {
+                var service = new MainService();
+
+                container.RegisterInstance<IMainService>(service);
+                container.RegisterInstance<IAnotherMainService>(service);
+
+                var serviceA = container.Resolve<IMainService>();
+                var anotherServiceA = container.Resolve<IAnotherMainService>();
+
+                Assert.AreSame(serviceA, anotherServiceA);
+                Assert.AreEqual(1, MainService.ConstructorCounter);
+            }
+
+            Assert.AreEqual(2, MainService.DisposeCounter);
+        }
+        
+        /// <summary>
+        /// For our final example we register the instance multiple times, but the first time we use a ContainerControlledLifetimeManager 
+        /// and after that we use ExternallyControlledLifetimeManager for the other registrations. 
+        /// This means that the dispose will only be called once against our object.
+        /// </summary>
+        [TestMethod]
+        public void RegisterInstanceMultipleTimesWithExternal()
+        {
+            MainService.ResetCounters();
+
+            using (var container = new UnityContainer())
+            {
+                var service = new MainService();
+
+                var manager = new ContainerControlledLifetimeManager();
+                container.RegisterInstance<IMainService>(service, manager);
+
+                var anotherManager = new ExternallyControlledLifetimeManager();
+                container.RegisterInstance<IAnotherMainService>(service, anotherManager);
+
+                var serviceA = container.Resolve<IMainService>();
+                var anotherServiceA = container.Resolve<IAnotherMainService>();
+
+                Assert.AreSame(serviceA, anotherServiceA);
+                Assert.AreEqual(1, MainService.ConstructorCounter);
+            }
+
+            Assert.AreEqual(1, MainService.DisposeCounter);
+        }
     }
 }
