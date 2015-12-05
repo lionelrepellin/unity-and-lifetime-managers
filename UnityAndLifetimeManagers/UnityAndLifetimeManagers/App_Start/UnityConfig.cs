@@ -39,7 +39,13 @@ namespace UnityAndLifetimeManagers.App_Start
             // TODO: Register your types here
             // container.RegisterType<IProductRepository, ProductRepository>();
 
-            container.RegisterType<MainService>();
+            //container.RegisterType<IMainService, MainService>();
+
+            //var mainService = new MainService();
+            //container.RegisterInstance<MainService>(mainService);
+
+            // See UnityMvcActivator.cs when using PerRequestLifetimeManager, objects will be disposed
+            container.RegisterType<IMainService, MainService>(new PerRequestLifetimeManager());
         }
     }
 }

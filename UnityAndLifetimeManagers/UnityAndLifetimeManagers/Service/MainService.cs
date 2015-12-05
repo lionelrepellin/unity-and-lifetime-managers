@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -11,6 +12,8 @@ namespace UnityAndLifetimeManagers.Service
 
     public class MainService : IMainService, IAnotherMainService
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         public static int ConstructorCounter { get; private set; }
         public static int DisposeCounter { get; private set; }
 
@@ -22,11 +25,13 @@ namespace UnityAndLifetimeManagers.Service
 
         public MainService()
         {
+            Logger.Debug("Constructor was called");
             ConstructorCounter++;
         }
 
         public void Dispose()
         {
+            Logger.Debug("Dispose was called");
             DisposeCounter++;
         }
     }    

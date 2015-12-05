@@ -89,6 +89,24 @@ namespace UnityAndLifetimeManagers.Tests
             Assert.AreEqual(0, MainService.DisposeCounter);
         }
 
+        [TestMethod]
+        public void PerRequestLifetimeManager()
+        {
+            //
+            // The PerRequestLifetimeManager can only be used in the context of an HTTP request.
+            // This is why we cannot unit test this lifetime manager here.
+            //
+            // To use PerRequestLifetimeManager, follow these two steps :
+            //
+            // 1) Register repositories / services like that in UnityConfig.cs :
+            // container.RegisterType<IMainService, MainService>(new PerRequestLifetimeManager());
+            //
+            // 2) Uncomment the line : Infrastructure.DynamicModuleHelper.DynamicModuleUtility.RegisterModule(typeof(UnityPerRequestHttpModule));
+            // in UnityMvcActivator.cs to enable dispose
+            //
+        }
+
+
         /// <summary>
         /// Rather than registering a type to type conversion, you can just register a particular instance of an object 
         /// with the container. This effectively makes that container treat that object as a singleton, and 
