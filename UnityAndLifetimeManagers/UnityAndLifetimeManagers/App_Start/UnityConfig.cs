@@ -2,6 +2,7 @@ using System;
 using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Configuration;
 using UnityAndLifetimeManagers.Service;
+using UnityAndLifetimeManagers.DAL;
 
 namespace UnityAndLifetimeManagers.App_Start
 {
@@ -39,13 +40,19 @@ namespace UnityAndLifetimeManagers.App_Start
             // TODO: Register your types here
             // container.RegisterType<IProductRepository, ProductRepository>();
 
+            // The MainService class will be instantiated for each resolve
+            // If no lifetime manager is defined, TransientLifetimeManager will be used by default
             //container.RegisterType<IMainService, MainService>();
 
+            // Register a particular instance of an object with the container, it works like a Singleton
+            // it is useful when storing configuration parameters for example
             //var mainService = new MainService();
             //container.RegisterInstance<MainService>(mainService);
 
-            // See UnityMvcActivator.cs when using PerRequestLifetimeManager, objects will be disposed
+            // See UnityMvcActivator.cs when using PerRequestLifetimeManager
+            // objects will be disposed at the end of the http request
             container.RegisterType<IMainService, MainService>(new PerRequestLifetimeManager());
+            container.RegisterType<IRepository, Repository>(new PerRequestLifetimeManager());
         }
     }
 }

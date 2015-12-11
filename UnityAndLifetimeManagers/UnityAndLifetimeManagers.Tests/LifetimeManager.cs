@@ -20,7 +20,7 @@ namespace UnityAndLifetimeManagers.Tests
     {
         /// <summary>
         /// This first demo shows what happens when you resolve a concrete class without first registering that class with the container. 
-        /// It will be instantiated for each resolve (as though registered with a TransientLifetimeManager), 
+        /// It will be INSTANTIATED FOR EACH RESOLVE (as though registered with a TransientLifetimeManager), 
         /// all dependencies in its constructor will be resolved by the container, and it WILL NOT BE DISPOSED.
         /// </summary>
         [TestMethod]
@@ -44,6 +44,7 @@ namespace UnityAndLifetimeManagers.Tests
 
         /// <summary>
         /// When an interface is registered with a container it defaults to using a TransientLifetimeManager.
+        /// Classes WILL NOT BE DISPOSED of by the container.
         /// </summary>
         [TestMethod]
         public void DefaultLifetimeManager()
@@ -98,18 +99,18 @@ namespace UnityAndLifetimeManagers.Tests
             //
             // To use PerRequestLifetimeManager, follow these two steps :
             //
-            // 1) Register repositories / services like that in UnityConfig.cs :
+            // 1) Register repositories / services like that in App_Start\UnityConfig.cs :
             // container.RegisterType<IMainService, MainService>(new PerRequestLifetimeManager());
             //
-            // 2) Uncomment the line : Infrastructure.DynamicModuleHelper.DynamicModuleUtility.RegisterModule(typeof(UnityPerRequestHttpModule));
-            // in UnityMvcActivator.cs to enable dispose
+            // 2) Uncomment the line: Infrastructure.DynamicModuleHelper.DynamicModuleUtility.RegisterModule(typeof(UnityPerRequestHttpModule));
+            // in App_Start\UnityMvcActivator.cs. This is necessary to ensure that services are disposed.
             //
         }
 
 
         /// <summary>
         /// Rather than registering a type to type conversion, you can just register a particular instance of an object 
-        /// with the container. This effectively makes that container treat that object as a singleton, and 
+        /// with the container. This effectively makes that container treat that object as a SINGLETON, and 
         /// by default IT WILL BE DISPOSED of with the container.
         /// </summary>
         [TestMethod]

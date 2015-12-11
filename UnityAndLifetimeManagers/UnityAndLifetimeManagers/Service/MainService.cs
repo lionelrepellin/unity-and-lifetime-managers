@@ -6,9 +6,15 @@ using System.Web;
 
 namespace UnityAndLifetimeManagers.Service
 {
-    public interface IAnotherMainService { }
+    public interface IAnotherMainService
+    {
+        // nothing here...
+    }
 
-    public interface IMainService : IDisposable { }
+    public interface IMainService : IDisposable
+    {
+        // nothing here...
+    }
 
     public class MainService : IMainService, IAnotherMainService
     {
@@ -16,6 +22,8 @@ namespace UnityAndLifetimeManagers.Service
 
         public static int ConstructorCounter { get; private set; }
         public static int DisposeCounter { get; private set; }
+
+        public Guid UniqueId { get; private set; }
 
         public static void ResetCounters()
         {
@@ -26,6 +34,7 @@ namespace UnityAndLifetimeManagers.Service
         public MainService()
         {
             Logger.Debug("Constructor was called");
+            UniqueId = Guid.NewGuid();
             ConstructorCounter++;
         }
 
@@ -34,7 +43,5 @@ namespace UnityAndLifetimeManagers.Service
             Logger.Debug("Dispose was called");
             DisposeCounter++;
         }
-    }    
+    }
 }
-
-
